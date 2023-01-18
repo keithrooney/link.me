@@ -2,6 +2,7 @@ package internal
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"os"
 	"time"
@@ -65,7 +66,7 @@ type dataSourceDatabase struct {
 func (d dataSourceDatabase) Exec(query string, args ...any) (sql.Result, error) {
 	db, err := d.dataSource.Connect()
 	if err != nil {
-		return nil, err
+		return nil, errors.New("failed to connect to database")
 	}
 	return db.Exec(query, args...)
 }
@@ -104,7 +105,7 @@ func (r databaseLinkRepository) Create(link Link) (Link, error) {
 		link.CreatedAt,
 		link.User.ID,
 	); err != nil {
-		return Link{}, err
+		return Link{}, errors.New("internal server error")
 	}
 	return link, nil
 }
@@ -154,7 +155,7 @@ func (r databaseLinkRepository) GetById(id string) (Link, error) {
 		&link.User.Model.UpdatedAt,
 		&link.User.Model.DeletedAt,
 	); err != nil {
-		return Link{}, err
+		return Link{}, errors.New("object not found")
 	}
 	return link, nil
 }
@@ -186,7 +187,7 @@ func (r databaseUserRepository) Create(user User) (User, error) {
 		user.Password,
 		user.CreatedAt,
 	); err != nil {
-		return User{}, err
+		return User{}, errors.New("internal server error")
 	}
 	return user, nil
 }
@@ -220,7 +221,7 @@ func (r databaseUserRepository) getBy(query string, value string) (User, error) 
 		&user.Model.UpdatedAt,
 		&user.Model.DeletedAt,
 	); err != nil {
-		return User{}, err
+		return User{}, errors.New("object not found")
 	}
 	return user, nil
 }
