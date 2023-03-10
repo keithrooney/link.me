@@ -38,6 +38,8 @@ func (s testUserRepository) GetByEmail(email string) (User, error) {
 
 func TestUserService(t *testing.T) {
 
+	ANCHORLY_TOKEN_KEY = []byte("this.is.a.secret!")
+
 	service := NewUserService(
 		testUserRepository{
 			users: make(map[string]User),
@@ -129,6 +131,70 @@ func TestUserService(t *testing.T) {
 		another, _ := service.GetByEmail(other.Email)
 		if other != another {
 			t.Fatal("expected != actual")
+		}
+
+	})
+
+	t.Run("TestLogin", func(t *testing.T) {
+
+		user := User{
+			Username: "Dr. Strange",
+			Email:    "drstrange@marvel.com",
+			Password: "82392342342",
+		}
+
+		if _, err := service.Create(user); err != nil {
+			t.Fatal(err)
+		}
+
+		if _, err := service.(LoginService).Login(user); err != nil {
+			t.Fatal(err)
+		}
+
+	})
+
+	t.Run("TestLoginReturnsBadRequest", func(t *testing.T) {
+
+		user := User{
+			Username: "Dr. Strange",
+			Email:    "mickocollins@marvel.com",
+			Password: "82392342342",
+		}
+
+		_, err := service.(LoginService).Login(user)
+		if err == nil {
+			t.Fatal(err)
+		}
+		if err.Error() != "bad request" {
+			t.Fatal("Expected a different error to be created.")
+		}
+
+	})
+
+	t.Run("TestLoginReturnsPermissionDenied", func(t *testing.T) {
+
+		user := User{
+			Username: "Dr. Strange",
+			Email:    "drstrange@marvel.com",
+			Password: "82392342342",
+		}
+
+		if _, err := service.Create(user); err != nil {
+			t.Fatal(err)
+		}
+
+		another := User{
+			Username: user.Username,
+			Email:    user.Email,
+			Password: "abcdefghijklmno",
+		}
+
+		_, err := service.(LoginService).Login(another)
+		if err == nil {
+			t.Fatal(err)
+		}
+		if err.Error() != "permission denied" {
+			t.Fatal("Expected a different error to be created.")
 		}
 
 	})

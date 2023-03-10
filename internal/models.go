@@ -38,3 +38,7 @@ func (user User) MarshalJSON() ([]byte, error) {
 		user.Email,
 	})
 }
+
+type Token struct {
+	Value string `json:"value"`
+}

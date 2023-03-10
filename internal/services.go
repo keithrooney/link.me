@@ -2,11 +2,15 @@ package internal
 
 import (
 	"errors"
+	"time"
 
 	validation "github.com/go-ozzo/ozzo-validation"
 	"github.com/go-ozzo/ozzo-validation/is"
+	"github.com/golang-jwt/jwt"
 	"golang.org/x/crypto/bcrypt"
 )
+
+var ANCHORLY_TOKEN_KEY []byte
 
 type UserService interface {
 	Create(user User) (User, error)
@@ -82,6 +86,34 @@ func NewUserService(userRepository UserRepository) UserService {
 	return repositoryUserService{
 		userRepository: userRepository,
 	}
+}
+
+type LoginService interface {
+	Login(user User) (Token, error)
+}
+
+func (s repositoryUserService) Login(other User) (Token, error) {
+	user, err := s.GetByEmail(other.Email)
+	if err != nil {
+		return Token{}, errors.New("bad request")
+	}
+	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(other.Password)); err != nil {
+		return Token{}, errors.New("permission denied")
+	}
+	claims := jwt.MapClaims{
+		"iss": "anchorly.com",
+		"sub": user.Model.ID,
+		"aud": user.Model.ID,
+		"exp": time.Now().Add(time.Hour * 3).UnixMilli(),
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	value, err := token.SignedString(ANCHORLY_TOKEN_KEY)
+	if err != nil {
+		return Token{}, errors.New("internal server error")
+	}
+	return Token{
+		Value: value,
+	}, nil
 }
 
 type LinkService interface {
