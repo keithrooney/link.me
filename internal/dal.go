@@ -142,7 +142,7 @@ func (r databaseLinkRepository) GetById(id string) (Link, error) {
 	return link, nil
 }
 
-func NewLinkRepository() LinkRepository {
+func newLinkRepository() LinkRepository {
 	return databaseLinkRepository{
 		database: newDatabase(),
 	}
@@ -208,7 +208,7 @@ func (r databaseUserRepository) getBy(query string, value string) (User, error) 
 	return user, nil
 }
 
-func NewUserRepository() UserRepository {
+func newUserRepository() UserRepository {
 	return databaseUserRepository{
 		database: newDatabase(),
 	}

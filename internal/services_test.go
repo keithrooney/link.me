@@ -38,11 +38,11 @@ func (s testUserRepository) GetByEmail(email string) (User, error) {
 
 func TestUserService(t *testing.T) {
 
-	service := NewUserService(
-		testUserRepository{
+	service := repositoryUserService{
+		userRepository: testUserRepository{
 			users: make(map[string]User),
 		},
-	)
+	}
 
 	t.Run("TestCreateWithInvalidFields", func(t *testing.T) {
 
@@ -145,7 +145,7 @@ func TestUserService(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		if _, err := service.(LoginService).Login(user); err != nil {
+		if _, err := service.Login(user); err != nil {
 			t.Fatal(err)
 		}
 
@@ -159,7 +159,7 @@ func TestUserService(t *testing.T) {
 			Password: "82392342342",
 		}
 
-		_, err := service.(LoginService).Login(user)
+		_, err := service.Login(user)
 		if err == nil {
 			t.Fatal(err)
 		}
@@ -187,7 +187,7 @@ func TestUserService(t *testing.T) {
 			Password: "abcdefghijklmno",
 		}
 
-		_, err := service.(LoginService).Login(another)
+		_, err := service.Login(another)
 		if err == nil {
 			t.Fatal(err)
 		}
@@ -220,9 +220,11 @@ func (r testLinkRepository) GetById(id string) (Link, error) {
 
 func TestLinkService(t *testing.T) {
 
-	linkService := NewLinkService(testLinkRepository{
-		links: make(map[string]Link),
-	})
+	linkService := repositoryLinkService{
+		linkRepository: testLinkRepository{
+			links: make(map[string]Link),
+		},
+	}
 
 	t.Run("TestCreateWithInvalidFields", func(t *testing.T) {
 

@@ -89,7 +89,7 @@ func TestMain(m *testing.M) {
 
 func TestLinkRepository(t *testing.T) {
 
-	userRepository := NewUserRepository()
+	userRepository := newUserRepository()
 
 	user, err := userRepository.Create(User{
 		Username: "jeandoe",
@@ -100,7 +100,7 @@ func TestLinkRepository(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	linkRepository := NewLinkRepository()
+	linkRepository := newLinkRepository()
 
 	link, err := linkRepository.Create(Link{
 		Title: "This my great website!",
@@ -145,7 +145,7 @@ func TestLinkRepository(t *testing.T) {
 
 func TestUserRepository(t *testing.T) {
 
-	repository := NewUserRepository()
+	repository := newUserRepository()
 
 	user := User{
 		Username: "johndoe",

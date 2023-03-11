@@ -91,9 +91,9 @@ func (s repositoryUserService) Exists(id string) bool {
 	return err == nil
 }
 
-func NewUserService(userRepository UserRepository) UserService {
+func NewUserService() UserService {
 	return repositoryUserService{
-		userRepository: userRepository,
+		userRepository: newUserRepository(),
 	}
 }
 
@@ -171,8 +171,8 @@ func (s repositoryLinkService) GetById(id string) (Link, error) {
 	return link, nil
 }
 
-func NewLinkService(linkRepository LinkRepository) LinkService {
+func NewLinkService() LinkService {
 	return repositoryLinkService{
-		linkRepository: linkRepository,
+		linkRepository: newLinkRepository(),
 	}
 }
