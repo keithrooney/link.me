@@ -38,8 +38,6 @@ func (s testUserRepository) GetByEmail(email string) (User, error) {
 
 func TestUserService(t *testing.T) {
 
-	ANCHORLY_TOKEN_KEY = []byte("this.is.a.secret!")
-
 	service := NewUserService(
 		testUserRepository{
 			users: make(map[string]User),

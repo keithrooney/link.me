@@ -2,6 +2,7 @@ package internal
 
 import (
 	"errors"
+	"os"
 	"time"
 
 	validation "github.com/go-ozzo/ozzo-validation"
@@ -10,7 +11,15 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-var ANCHORLY_TOKEN_KEY []byte
+var secret []byte
+
+func init() {
+	if value, found := os.LookupEnv("ANCHORLY_TOKEN_KEY"); !found {
+		panic("Expected environment variable to be configured.")
+	} else {
+		secret = []byte(value)
+	}
+}
 
 type UserService interface {
 	Create(user User) (User, error)
@@ -107,7 +116,7 @@ func (s repositoryUserService) Login(other User) (Token, error) {
 		"exp": time.Now().Add(time.Hour * 3).UnixMilli(),
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	value, err := token.SignedString(ANCHORLY_TOKEN_KEY)
+	value, err := token.SignedString(secret)
 	if err != nil {
 		return Token{}, errors.New("internal server error")
 	}
