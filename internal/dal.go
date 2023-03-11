@@ -4,55 +4,37 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"os"
 	"time"
 
 	"github.com/google/uuid"
 	_ "github.com/lib/pq"
+	"github.com/spf13/viper"
 )
+
+func init() {
+	dataSource = postgresDataSource{}
+	if err := viper.UnmarshalKey("database", &dataSource); err != nil {
+		panic(err)
+	}
+}
 
 type DataSource interface {
 	Connect() (*sql.DB, error)
 }
 
 type postgresDataSource struct {
-	username string
-	password string
-	host     string
-	port     string
+	Username string
+	Password string
+	Host     string
+	Port     string
 }
 
 func (s postgresDataSource) Connect() (*sql.DB, error) {
-	source := fmt.Sprintf("postgresql://%s:%s@%s:%s/anchorly?sslmode=disable", s.username, s.password, s.host, s.port)
+	source := fmt.Sprintf("postgresql://%s:%s@%s:%s/anchorly?sslmode=disable", s.Username, s.Password, s.Host, s.Port)
 	return sql.Open("postgres", source)
 }
 
-var (
-	DEFAULT_DATABASE_USERNAME = "admin"
-	DEFAULT_DATABASE_HOST     = "localhost"
-	DEFAULT_DATABASE_PORT     = "5432"
-)
-
-func NewDataSource(username string, password string, host string, port string) DataSource {
-	if username == "" {
-		username = DEFAULT_DATABASE_USERNAME
-	}
-	if password == "" {
-		password = os.Getenv("ANCHORLY_DATABASE_PASSWORD")
-	}
-	if host == "" {
-		host = DEFAULT_DATABASE_HOST
-	}
-	if port == "" {
-		port = DEFAULT_DATABASE_PORT
-	}
-	return postgresDataSource{
-		username: username,
-		password: password,
-		host:     host,
-		port:     port,
-	}
-}
+var dataSource DataSource
 
 type Database interface {
 	Exec(query string, args ...any) (sql.Result, error)
@@ -79,7 +61,7 @@ func (d dataSourceDatabase) QueryRow(query string, args ...any) (*sql.Row, error
 	return db.QueryRow(query, args...), nil
 }
 
-func NewDatabase(dataSource DataSource) Database {
+func newDatabase() Database {
 	return dataSourceDatabase{
 		dataSource: dataSource,
 	}
@@ -160,9 +142,9 @@ func (r databaseLinkRepository) GetById(id string) (Link, error) {
 	return link, nil
 }
 
-func NewLinkRepository(database Database) LinkRepository {
+func NewLinkRepository() LinkRepository {
 	return databaseLinkRepository{
-		database: database,
+		database: newDatabase(),
 	}
 }
 
@@ -226,8 +208,8 @@ func (r databaseUserRepository) getBy(query string, value string) (User, error) 
 	return user, nil
 }
 
-func NewUserRepository(database Database) UserRepository {
+func NewUserRepository() UserRepository {
 	return databaseUserRepository{
-		database: database,
+		database: newDatabase(),
 	}
 }

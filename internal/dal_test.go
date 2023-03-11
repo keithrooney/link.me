@@ -49,10 +49,16 @@ func TestMain(m *testing.M) {
 		log.Fatal(err)
 	}
 
-	datasource := NewDataSource(ACHORLY_DATABASE_USERNAME, ACHORLY_DATABASE_PASSWORD, ACHORLY_DATABASE_HOST, resource.GetPort("5432/tcp"))
+	dataSource = postgresDataSource{
+		Username: ACHORLY_DATABASE_USERNAME,
+		Password: ACHORLY_DATABASE_PASSWORD,
+		Host:     ACHORLY_DATABASE_HOST,
+		Port:     resource.GetPort("5432/tcp"),
+	}
+
 	if err := pool.Retry(func() error {
 		var err error
-		db, err := datasource.Connect()
+		db, err := dataSource.Connect()
 		if err != nil {
 			return err
 		}
@@ -61,7 +67,7 @@ func TestMain(m *testing.M) {
 		log.Fatal(err)
 	}
 
-	db, err := datasource.Connect()
+	db, err := dataSource.Connect()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -70,8 +76,6 @@ func TestMain(m *testing.M) {
 	if err := goose.Up(db, migrations); err != nil {
 		log.Fatal(err)
 	}
-
-	DATABASE = NewDatabase(datasource)
 
 	code := m.Run()
 
@@ -85,7 +89,7 @@ func TestMain(m *testing.M) {
 
 func TestLinkRepository(t *testing.T) {
 
-	userRepository := NewUserRepository(DATABASE)
+	userRepository := NewUserRepository()
 
 	user, err := userRepository.Create(User{
 		Username: "jeandoe",
@@ -96,7 +100,7 @@ func TestLinkRepository(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	linkRepository := NewLinkRepository(DATABASE)
+	linkRepository := NewLinkRepository()
 
 	link, err := linkRepository.Create(Link{
 		Title: "This my great website!",
@@ -141,7 +145,7 @@ func TestLinkRepository(t *testing.T) {
 
 func TestUserRepository(t *testing.T) {
 
-	repository := NewUserRepository(DATABASE)
+	repository := NewUserRepository()
 
 	user := User{
 		Username: "johndoe",
