@@ -7,7 +7,7 @@ import (
 	"github.com/golang-jwt/jwt"
 )
 
-func WithAuthentication(next http.Handler) http.HandlerFunc {
+func withAuthentication(next http.HandlerFunc) http.HandlerFunc {
 	return func(rw http.ResponseWriter, req *http.Request) {
 		header := req.Header.Get("authorization")
 		if header == "" {
@@ -28,4 +28,16 @@ func WithAuthentication(next http.Handler) http.HandlerFunc {
 			rw.Write([]byte("forbidden"))
 		}
 	}
+}
+
+type HandlerBuilder struct {
+	next http.HandlerFunc
+}
+
+func (b HandlerBuilder) WithAuthentication() HandlerBuilder {
+	return HandlerBuilder{next: withAuthentication(b.next)}
+}
+
+func (b HandlerBuilder) Build() http.HandlerFunc {
+	return b.next
 }

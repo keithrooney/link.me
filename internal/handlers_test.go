@@ -18,10 +18,7 @@ func (s testAuthenticationService) Authenticate(token string) error {
 	return s.err
 }
 
-type testHandler struct {
-}
-
-func (h testHandler) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
+func testHandlerFunc(rw http.ResponseWriter, req *http.Request) {
 	rw.WriteHeader(http.StatusOK)
 }
 
@@ -32,7 +29,7 @@ func TestAuthenticationHandler(t *testing.T) {
 		request := httptest.NewRequest("GET", "/v1/links", nil)
 		response := httptest.NewRecorder()
 
-		handlerFunc := WithAuthentication(testHandler{})
+		handlerFunc := withAuthentication(testHandlerFunc)
 		handlerFunc(response, request)
 
 		statusCode := response.Result().StatusCode
@@ -58,7 +55,7 @@ func TestAuthenticationHandler(t *testing.T) {
 
 		request.Header.Add("Authorization", "34234jfsdf.23eadsfa3rasd.23rasd88a3rakdfa")
 
-		handlerFunc := WithAuthentication(testHandler{})
+		handlerFunc := withAuthentication(testHandlerFunc)
 		handlerFunc(response, request)
 
 		statusCode := response.Result().StatusCode
@@ -87,7 +84,7 @@ func TestAuthenticationHandler(t *testing.T) {
 
 		request.Header.Add("Authorization", value)
 
-		handlerFunc := WithAuthentication(testHandler{})
+		handlerFunc := withAuthentication(testHandlerFunc)
 		handlerFunc(response, request)
 
 		statusCode := response.Result().StatusCode
