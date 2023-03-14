@@ -125,27 +125,6 @@ func (s repositoryUserService) Login(other User) (Token, error) {
 	}, nil
 }
 
-type AuthenticationService interface {
-	Authenticate(token string)
-}
-
-func (s repositoryUserService) Authenticate(tokenString string) error {
-	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, errors.New("internal server error")
-		}
-		return secret, nil
-	})
-	if err != nil {
-		return errors.New("internal server error")
-	}
-	if token.Valid {
-		return nil
-	} else {
-		return errors.New("permission denied")
-	}
-}
-
 type LinkService interface {
 	Create(link Link) (Link, error)
 	GetById(id string) (Link, error)

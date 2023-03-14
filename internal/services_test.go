@@ -197,36 +197,6 @@ func TestUserService(t *testing.T) {
 
 	})
 
-	t.Run("TestAuthenticate", func(t *testing.T) {
-
-		user := User{
-			Username: "Mr. Marvel",
-			Email:    "mrmarvel@marvel.com",
-			Password: "9302dkasd9320dkad3",
-		}
-
-		if _, err := service.Create(user); err != nil {
-			t.Fatal(err)
-		}
-
-		token, err := service.Login(user)
-		if err != nil {
-			t.Fatal(err)
-		}
-
-		if err := service.Authenticate(token.Value); err != nil {
-			t.Fatal(err)
-		}
-
-	})
-
-	t.Run("TestAuthenticatePermissionDenied", func(t *testing.T) {
-		tokenString := "as8dfk238rakdfa83.adsf92rfkasdsf.adf293riasidfakwefawef"
-		if err := service.Authenticate(tokenString); err == nil {
-			t.Fatal(err)
-		}
-	})
-
 }
 
 type testLinkRepository struct {
