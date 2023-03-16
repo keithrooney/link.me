@@ -7,7 +7,7 @@ import (
 	"github.com/golang-jwt/jwt"
 )
 
-func WithAuthentication(next http.HandlerFunc) http.HandlerFunc {
+func WithAuthentication(next http.Handler) http.HandlerFunc {
 	return func(rw http.ResponseWriter, req *http.Request) {
 		header := req.Header.Get("authorization")
 		if header == "" {
